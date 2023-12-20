@@ -128,11 +128,11 @@ class GLLMNeedleHaystackTester:
         self.openai_api_key = openai_api_key or os.getenv('OPENAI_API_KEY')
         self.model_name = model_name
 
-        if not self.openai_api_key and not os.getenv('OPENAI_API_KEY'):
-            raise ValueError(
-                "Either openai_api_key must be supplied with init, or OPENAI_API_KEY must be in env. Used for evaluation model")
-        else:
-            self.openai_api_key = openai_api_key or os.getenv('OPENAI_API_KEY')
+        # if not self.openai_api_key and not os.getenv('OPENAI_API_KEY'):
+        #     raise ValueError(
+        #         "Either openai_api_key must be supplied with init, or OPENAI_API_KEY must be in env. Used for evaluation model")
+        # else:
+        #     self.openai_api_key = openai_api_key or os.getenv('OPENAI_API_KEY')
 
         # Google API KEY
 
@@ -153,7 +153,7 @@ class GLLMNeedleHaystackTester:
             self.model_to_test = genai.GenerativeModel(model_name=self.model_name)
 
         self.model_to_test_description = model_name
-        self.evaluation_model = ChatOpenAI(model="gpt-3.5-turbo-1106", temperature=0, openai_api_key=self.openai_api_key)
+        #self.evaluation_model = ChatOpenAI(model="gpt-3.5-turbo-1106", temperature=0, openai_api_key=self.openai_api_key)
 
     def result_exists(self, context_length, depth_percent):
         """
