@@ -2,6 +2,7 @@ import os
 import tiktoken
 from LLMNeedleHaystackTester import LLMNeedleHaystackTester
 import google.generativeai as genai
+import time
 
 
 class GoogleEvaluator(LLMNeedleHaystackTester):
@@ -27,7 +28,7 @@ class GoogleEvaluator(LLMNeedleHaystackTester):
 
         genai.configure(api_key=self.google_api_key)
         self.model_to_test = genai.GenerativeModel(model_name=self.model_name)
-
+        kwargs['context_lengths_max'] = 31000
         super().__init__(**kwargs)
 
 
