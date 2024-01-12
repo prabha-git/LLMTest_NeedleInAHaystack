@@ -39,11 +39,14 @@ class LLMNeedleHaystackTester(ABC):
                  document_depth_percent_interval_type="linear",
                  num_concurrent_requests=1,
                  save_results=True,
+                 save_results_dir='results',
                  save_contexts=True,
+                 save_contexts_dir='contexts',
                  final_context_length_buffer=200,
                  seconds_to_sleep_between_completions=None,
                  print_ongoing_status=True,
-                 evaluation_method='gpt4'):
+                 evaluation_method='gpt4'
+                 ):
         """
         :param needle: The needle to be found in the haystack. Default is None.
         :param haystack_dir: The directory of text files to use as background context (or a haystack) in which the needle is to be found. Default is Paul Graham Essays.
@@ -52,7 +55,9 @@ class LLMNeedleHaystackTester(ABC):
         :param results_version: In case you would like to try the same combination of model, context length, and depth % multiple times, change the results version other than 1
         :param num_concurrent_requests: Due to volume, this object is set up to run concurrent requests, default = 1. Be careful of rate limits.
         :param save_results: Whether or not you would like to save your contexts to file. Warning: These will get long! Default = True
+        :param save_results_dir: Default: results , folder where outputs saved
         :param save_contexts: Whether or not you would like to save your contexts to file. Warning: These will get long! Default is True.
+        :param save_contexts_dir: Default: contexts , Where context for each run would be
         :param final_context_length_buffer: The amount of cushion you'd like to leave off the input context to allow for the output context. Default 200 tokens
         :param context_lengths_min: The minimum length of the context. Default is 1000.
         :param context_lengths_max: The maximum length of the context. Default is 200000.
@@ -74,8 +79,10 @@ class LLMNeedleHaystackTester(ABC):
         self.results_version = results_version
         self.num_concurrent_requests = num_concurrent_requests
         self.save_results = save_results
+        self.save_results_dir = save_results_dir
         self.final_context_length_buffer = final_context_length_buffer
         self.save_contexts = save_contexts
+        self.save_contexts_dir = save_contexts_dir
         self.seconds_to_sleep_between_completions = seconds_to_sleep_between_completions
         self.print_ongoing_status = print_ongoing_status
         self.testing_results = []
@@ -112,7 +119,8 @@ class LLMNeedleHaystackTester(ABC):
             raise ValueError(
                 "document_depth_percent_interval_type must be either None, 'linear' or 'sigmoid'. If you'd like your own distribution give a list of ints in via document_depth_percent_intervals")
 
-        self.evaluation_model = ChatOpenAI(model="gpt-4", temperature=0, openai_api_key=self.openai_api_key)
+        if evaluation_method=='gpt4':
+            self.evaluation_model = ChatOpenAI(model="gpt-4", temperature=0, openai_api_key=self.openai_api_key)
 
         if evaluation_method == 'substring_match' and not all(
                 word.lower() in needle.lower() for word in substr_validation_words):
@@ -131,6 +139,7 @@ class LLMNeedleHaystackTester(ABC):
         async with sem:
             await self.evaluate_and_log(*args)
 
+
     async def run_test(self):
         sem = Semaphore(self.num_concurrent_requests)
 
@@ -143,7 +152,6 @@ class LLMNeedleHaystackTester(ABC):
 
         # Wait for all tasks to complete
         await asyncio.gather(*tasks)
-
     @abstractmethod
     def get_prompt(self, context):
         pass
@@ -203,22 +211,22 @@ class LLMNeedleHaystackTester(ABC):
         context_file_location = f'{self.model_name.replace(".", "_")}_len_{context_length}_depth_{int(depth_percent * 100)}'
 
         if self.save_contexts:
-            results['file_name']: context_file_location
+            results['file_name']= context_file_location
 
             # Save the context to file for retesting
-            if not os.path.exists('contexts'):
-                os.makedirs('contexts')
+            if not os.path.exists(self.save_contexts_dir):
+                os.makedirs(self.save_contexts_dir)
 
-            with open(f'contexts/{context_file_location}_context.txt', 'w') as f:
+            with open(f'{self.save_contexts_dir}/{self.save_contexts_dir}_{context_file_location}_context.txt', 'w') as f:
                 f.write(context)
 
         if self.save_results:
             # Save the context to file for retesting
-            if not os.path.exists('results'):
-                os.makedirs('results')
+            if not os.path.exists(self.save_results_dir):
+                os.makedirs(self.save_results_dir)
 
             # Save the result to file for retesting
-            with open(f'results/{context_file_location}_results.json', 'w') as f:
+            with open(f'{self.save_results_dir}/{self.save_results_dir}_{context_file_location}_results.json', 'w') as f:
                 json.dump(results, f)
 
         if self.seconds_to_sleep_between_completions:
@@ -229,13 +237,12 @@ class LLMNeedleHaystackTester(ABC):
         Checks to see if a result has already been evaluated or not
         """
 
-        results_dir = 'results/'
-        if not os.path.exists(results_dir):
+        if not os.path.exists(self.save_results_dir):
             return False
 
-        for filename in os.listdir(results_dir):
+        for filename in os.listdir(self.save_results_dir):
             if filename.endswith('.json'):
-                with open(os.path.join(results_dir, filename), 'r') as f:
+                with open(os.path.join(self.save_results_dir, filename), 'r') as f:
                     result = json.load(f)
                     context_length_met = result['context_length'] == context_length
                     depth_percent_met = result['depth_percent'] == depth_percent
