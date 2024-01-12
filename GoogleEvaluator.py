@@ -55,6 +55,9 @@ class GoogleEvaluator(LLMNeedleHaystackTester):
 
 if __name__ == "__main__":
     # Tons of defaults set, check out the LLMNeedleHaystackTester's init for more info
-    ht = GoogleEvaluator(model_name='gemini-pro', evaluation_method='substring_match')
+    ht = GoogleEvaluator(model_name='gemini-pro', evaluation_method='substring_match',
+                         save_results_dir='gemini-pro-results-run2',
+                         save_contexts_dir='gemini-pro-context-run2'
+                         )
 
     ht.start_test()

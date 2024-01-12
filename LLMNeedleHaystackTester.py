@@ -215,7 +215,7 @@ class LLMNeedleHaystackTester(ABC):
 
             # Save the context to file for retesting
             if not os.path.exists(self.save_contexts_dir):
-                os.makedirs('self.save_contexts_dir')
+                os.makedirs(self.save_contexts_dir)
 
             with open(f'{self.save_contexts_dir}/{self.save_contexts_dir}_{context_file_location}_context.txt', 'w') as f:
                 f.write(context)
