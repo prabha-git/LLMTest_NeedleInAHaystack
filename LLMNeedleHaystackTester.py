@@ -219,8 +219,9 @@ class LLMNeedleHaystackTester(ABC):
             if not os.path.exists(self.save_contexts_dir):
                 os.makedirs(self.save_contexts_dir)
 
-            with open(f'{self.save_contexts_dir}/{self.save_contexts_dir}_{context_file_location}_context.txt', 'w') as f:
+            with open(f'{self.save_contexts_dir}/{context_file_location}_context.txt', 'w') as f:
                 f.write(context)
+
 
         if self.save_results:
             # Save the context to file for retesting
@@ -228,7 +229,7 @@ class LLMNeedleHaystackTester(ABC):
                 os.makedirs(self.save_results_dir)
 
             # Save the result to file for retesting
-            with open(f'{self.save_results_dir}/{self.save_results_dir}_{context_file_location}_results.json', 'w') as f:
+            with open(f'{self.save_results_dir}/{context_file_location}_results.json', 'w') as f:
                 json.dump(results, f)
 
         if self.seconds_to_sleep_between_completions:

@@ -2,18 +2,19 @@ import os
 import tiktoken
 from LLMNeedleHaystackTester import LLMNeedleHaystackTester
 from langchain_together import Together
+import time
 
 
 
-class Mixtral8_7BEvaluator(LLMNeedleHaystackTester):
+class OSS_TogetherEvaluator(LLMNeedleHaystackTester):
     def __init__(self,**kwargs):
         if 'together_api_key' not in  kwargs and not os.getenv('TOGETHER_API_KEY'):
             raise ValueError("Either together_api_key must be supplied with init, or TOGETHER_API_KEY must be in env")
 
         if 'model_name' not in kwargs:
             raise ValueError("model_name must be supplied with init, accepted model_names are ''")
-        elif kwargs['model_name'] not in ['Mixtral-8x7B-Instruct-v0.1']:
-            raise ValueError(f"Model name must be in this list (Mixtral-8x7B-Instruct-v0.1) but given {kwargs['model_name']}")
+        elif kwargs['model_name'] not in ['Mixtral-8x7B-Instruct-v0.1','Mistral-7B-Instruct-v0.2']:
+            raise ValueError(f"Model name must be in this list (Mixtral-8x7B-Instruct-v0.1,Mistral-7B-Instruct-v0.2) but given {kwargs['model_name']}")
 
         if 'evaluation_method' not in kwargs:
             print("since evaluation method is not specified , 'gpt4' will be used for evaluation")
@@ -53,9 +54,9 @@ class Mixtral8_7BEvaluator(LLMNeedleHaystackTester):
 
 if __name__ == "__main__":
     # Tons of defaults set, check out the LLMNeedleHaystackTester's init for more info
-    ht = Mixtral8_7BEvaluator(model_name='Mixtral-8x7B-Instruct-v0.1', evaluation_method='substring_match',
-                         save_results_dir='results/Mixtral8_7B/results-run1',
-                         save_contexts_dir='contexts/Mixtral8_7B/contexts-run1'
+    ht = OSS_TogetherEvaluator(model_name='Mistral-7B-Instruct-v0.2', evaluation_method='substring_match',
+                         save_results_dir='results/Mixtral_7B/results-run2',
+                         save_contexts_dir='contexts/Mixtral_7B/contexts-run2'
                          )
 
     ht.start_test()
