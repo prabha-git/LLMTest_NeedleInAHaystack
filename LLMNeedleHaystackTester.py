@@ -167,6 +167,7 @@ class LLMNeedleHaystackTester(ABC):
         # This helps if the program stop running and you want to restart later
         if self.save_results:
             if self.result_exists(context_length, depth_percent):
+                print(f"Test results for context length {context_length} and depth {depth_percent} exists, so skiping test now")
                 return
 
         # Go generate the required length context and place your needle statement in
